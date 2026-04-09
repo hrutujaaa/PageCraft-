@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PageCraft Studio — Premium Landing Pages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --ink: #0a0a0f;
+  --paper: #f5f0e8;
+  --gold: #c8a84b;
+  --gold2: #f0d080;
+  --red: #e63946;
+  --teal: #00d4c8;
+  --purple: #7b2fff;
+  --mid: #1a1a2e;
+  --glass: rgba(255,255,255,0.04);
+  --border: rgba(200,168,75,0.25);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--ink);color:var(--paper);font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none}
+
+/* CUSTOM CURSOR */
+#cursor{position:fixed;width:12px;height:12px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s,width .2s,height .2s,background .2s;mix-blend-mode:difference}
+#cursor-ring{position:fixed;width:40px;height:40px;border:1.5px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .15s ease;mix-blend-mode:difference}
+
+/* CANVAS */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid transparent;transition:all .5s}
+nav.scrolled{background:rgba(10,10,15,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:var(--gold);text-decoration:none}
+.logo span{color:var(--teal)}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{color:var(--paper);text-decoration:none;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;position:relative;transition:color .3s}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--gold);transition:width .3s}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{background:var(--gold);color:var(--ink);padding:.6rem 1.5rem;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;font-weight:800;border:none;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .3s}
+.nav-cta:hover{background:var(--gold2);transform:scale(1.05)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:200}
+.hamburger span{width:28px;height:2px;background:var(--gold);transition:all .3s;display:block}
+
+/* SECTIONS */
+section{position:relative;z-index:1}
+
+/* ========== HOME ========== */
+#home{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0 3rem;overflow:hidden}
+.home-inner{max-width:1200px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.home-text{}
+.badge{display:inline-flex;align-items:center;gap:.6rem;border:1px solid var(--border);padding:.4rem 1rem;border-radius:2px;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:2rem;font-family:'DM Mono',monospace}
+.badge::before{content:'●';color:var(--teal);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+h1.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,8vw,7rem);line-height:.95;letter-spacing:2px;margin-bottom:1.5rem}
+h1.hero-title .line{display:block;overflow:hidden}
+h1.hero-title .line span{display:block;animation:slideUp .9s cubic-bezier(.16,1,.3,1) forwards;opacity:0}
+h1.hero-title .line:nth-child(1) span{animation-delay:.1s}
+h1.hero-title .line:nth-child(2) span{animation-delay:.25s}
+h1.hero-title .line:nth-child(3) span{animation-delay:.4s}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.gold-text{color:var(--gold)}
+.red-text{color:var(--red)}
+.teal-text{color:var(--teal)}
+.hero-sub{font-size:1rem;line-height:1.7;color:rgba(245,240,232,.6);margin-bottom:2.5rem;max-width:480px}
+.hero-actions{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.btn-primary{background:var(--gold);color:var(--ink);padding:.9rem 2.5rem;font-family:'Syne',sans-serif;font-size:.8rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:all .3s;text-decoration:none;display:inline-block;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%)}
+.btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .5s}
+.btn-primary:hover::before{left:100%}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(200,168,75,.4)}
+.btn-ghost{border:1px solid var(--border);color:var(--paper);padding:.9rem 2rem;font-size:.8rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;background:transparent;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-block}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,168,75,.05)}
+.price-pill{display:flex;align-items:baseline;gap:.5rem;margin-top:1.5rem}
+.price-pill .amount{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--gold);line-height:1}
+.price-pill .details{font-family:'DM Mono',monospace;font-size:.75rem;color:rgba(245,240,232,.5);line-height:1.4}
+.price-pill .details strong{color:var(--teal);display:block}
+
+/* 3D CARD HERO */
+.hero-3d{display:flex;align-items:center;justify-content:center;perspective:1000px}
+.card-3d{width:340px;height:480px;position:relative;transform-style:preserve-3d;animation:float3d 6s ease-in-out infinite;cursor:pointer;transition:transform .1s}
+@keyframes float3d{0%,100%{transform:rotateX(5deg) rotateY(-10deg) translateY(0)}50%{transform:rotateX(-5deg) rotateY(10deg) translateY(-20px)}}
+.card-3d-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:4px;overflow:hidden}
+.card-front{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--border);display:flex;flex-direction:column;padding:2.5rem}
+.card-front::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(200,168,75,.1),transparent 60%);animation:rotateBg 8s linear infinite}
+@keyframes rotateBg{to{transform:rotate(360deg)}}
+.card-front-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+.card-tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:3px;color:var(--teal);text-transform:uppercase;margin-bottom:auto}
+.card-number{font-family:'Bebas Neue',sans-serif;font-size:5rem;color:var(--gold);line-height:1;opacity:.2;position:absolute;right:1.5rem;top:1rem}
+.card-preview{flex:1;display:flex;flex-direction:column;gap:.8rem;justify-content:center}
+.card-bar{height:8px;border-radius:2px;background:rgba(255,255,255,.08)}
+.card-bar:nth-child(1){width:100%;background:linear-gradient(90deg,var(--gold),var(--teal))}
+.card-bar:nth-child(2){width:75%}
+.card-bar:nth-child(3){width:55%}
+.card-dots{display:flex;gap:.5rem;margin-top:.5rem}
+.card-dot{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08)}
+.card-dot:nth-child(1){background:var(--gold);opacity:.7}
+.card-dot:nth-child(2){background:var(--teal);opacity:.5}
+.card-meta{margin-top:auto}
+.card-meta h3{font-size:1.1rem;font-weight:700;margin-bottom:.3rem}
+.card-meta p{font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(245,240,232,.4)}
+.card-glow{position:absolute;bottom:-30%;left:10%;width:80%;height:60%;background:radial-gradient(ellipse,rgba(200,168,75,.2),transparent);filter:blur(30px);pointer-events:none}
+
+/* STATS */
+.hero-stats{display:flex;gap:3rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.stat{}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--gold);line-height:1}
+.stat-label{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,.4);font-family:'DM Mono',monospace}
+
+/* SECTION COMMON */
+.section-header{text-align:center;margin-bottom:5rem}
+.section-tag{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:4px;text-transform:uppercase;color:var(--teal);margin-bottom:1rem;display:block}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4.5rem);line-height:1;letter-spacing:2px}
+.section-sub{font-size:.95rem;color:rgba(245,240,232,.5);max-width:500px;margin:.8rem auto 0;line-height:1.7}
+
+/* ========== ABOUT ========== */
+#about{padding:8rem 3rem;background:linear-gradient(180deg,var(--ink) 0%,#0d0d1a 100%)}
+.about-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center}
+.about-visual{position:relative;perspective:1200px}
+.cube-wrap{width:260px;height:260px;position:relative;margin:0 auto;transform-style:preserve-3d;animation:rotateCube 12s linear infinite}
+@keyframes rotateCube{0%{transform:rotateX(20deg) rotateY(0deg)}100%{transform:rotateX(20deg) rotateY(360deg)}}
+.cube{width:200px;height:200px;position:absolute;top:50%;left:50%;transform-style:preserve-3d;transform:translate(-50%,-50%)}
+.cube-face{position:absolute;width:200px;height:200px;border:2px solid var(--border);background:rgba(200,168,75,.04);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--gold);opacity:.8;backdrop-filter:blur(10px)}
+.cube-face.front{transform:translateZ(100px)}
+.cube-face.back{transform:rotateY(180deg) translateZ(100px)}
+.cube-face.left{transform:rotateY(-90deg) translateZ(100px)}
+.cube-face.right{transform:rotateY(90deg) translateZ(100px)}
+.cube-face.top{transform:rotateX(90deg) translateZ(100px)}
+.cube-face.bottom{transform:rotateX(-90deg) translateZ(100px)}
+.about-orbs{position:absolute;inset:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(40px)}
+.orb1{width:200px;height:200px;background:radial-gradient(var(--gold),transparent);top:-10%;left:-10%;opacity:.15}
+.orb2{width:150px;height:150px;background:radial-gradient(var(--teal),transparent);bottom:0;right:0;opacity:.1}
+
+.about-content{}
+.about-text{font-size:1rem;line-height:1.8;color:rgba(245,240,232,.65);margin-bottom:2rem}
+.page-list{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:2.5rem}
+.page-list li{display:flex;align-items:center;gap:.8rem;font-size:.85rem;font-weight:600}
+.page-list li::before{content:'◆';color:var(--gold);font-size:.5rem;flex-shrink:0}
+.delivery-badge{background:linear-gradient(135deg,rgba(0,212,200,.1),rgba(123,47,255,.1));border:1px solid rgba(0,212,200,.3);padding:1.5rem 2rem;border-radius:2px;display:flex;align-items:center;gap:1.5rem}
+.delivery-icon{font-size:2.5rem}
+.delivery-text h4{font-size:.9rem;font-weight:800;margin-bottom:.3rem;color:var(--teal)}
+.delivery-text p{font-size:.8rem;color:rgba(245,240,232,.5);font-family:'DM Mono',monospace}
+
+/* ========== PRODUCTS ========== */
+#products{padding:8rem 3rem;background:#0d0d1a}
+.products-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.product-card{position:relative;background:var(--glass);border:1px solid var(--border);padding:2.5rem 2rem;border-radius:2px;transition:all .4s;transform-style:preserve-3d;cursor:pointer;overflow:hidden}
+.product-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,168,75,.08),transparent);opacity:0;transition:opacity .4s}
+.product-card:hover::before{opacity:1}
+.product-card:hover{transform:translateY(-8px) rotateX(3deg);border-color:var(--gold);box-shadow:0 20px 60px rgba(200,168,75,.15)}
+.product-num{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;color:rgba(200,168,75,.15);line-height:1;margin-bottom:.5rem}
+.product-icon{font-size:2rem;margin-bottom:1rem;display:block;filter:drop-shadow(0 0 10px rgba(0,212,200,.4))}
+.product-card h3{font-size:1.1rem;font-weight:800;margin-bottom:.8rem;letter-spacing:1px}
+.product-card p{font-size:.82rem;color:rgba(245,240,232,.5);line-height:1.7;margin-bottom:1.5rem}
+.product-card .tag{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);border:1px solid var(--border);padding:.3rem .8rem;display:inline-block}
+.product-card-glow{position:absolute;bottom:-50%;left:50%;transform:translateX(-50%);width:100%;height:100%;background:radial-gradient(ellipse,rgba(200,168,75,.12),transparent);pointer-events:none;opacity:0;transition:opacity .4s}
+.product-card:hover .product-card-glow{opacity:1}
+.product-card.featured{border-color:rgba(0,212,200,.4);grid-column:span 1}
+.product-card.featured .product-num{color:rgba(0,212,200,.2)}
+.product-ribbon{position:absolute;top:1rem;right:-2rem;background:var(--teal);color:var(--ink);font-size:.6rem;font-weight:800;letter-spacing:2px;padding:.3rem 2.5rem;transform:rotate(45deg);transform-origin:center}
+
+/* ========== TEAM ========== */
+#team{padding:8rem 3rem;background:linear-gradient(180deg,#0d0d1a,var(--ink))}
+.team-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.team-card{perspective:800px;cursor:pointer;height:380px}
+.team-card-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.team-card:hover .team-card-inner{transform:rotateY(180deg)}
+.team-front,.team-back{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--border);background:var(--glass);border-radius:2px;padding:2rem;display:flex;flex-direction:column;align-items:center;text-align:center}
+.team-back{transform:rotateY(180deg);background:linear-gradient(135deg,rgba(200,168,75,.1),rgba(0,212,200,.05));border-color:var(--gold);justify-content:center;gap:1rem}
+.team-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--ink);margin-bottom:1.5rem;position:relative;flex-shrink:0}
+.team-avatar::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gold);opacity:.4;animation:avatarPulse 3s ease-in-out infinite}
+@keyframes avatarPulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.1);opacity:.1}}
+.team-front h3{font-size:1rem;font-weight:800;margin-bottom:.3rem;letter-spacing:1px}
+.team-front .role{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+.team-front p{font-size:.78rem;color:rgba(245,240,232,.4);line-height:1.6}
+.team-skills{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:.8rem}
+.skill-tag{background:rgba(200,168,75,.1);border:1px solid var(--border);font-size:.55rem;letter-spacing:1px;padding:.2rem .6rem;color:var(--gold);text-transform:uppercase;font-family:'DM Mono',monospace}
+.team-back p{font-size:.82rem;color:rgba(245,240,232,.7);line-height:1.7}
+.team-back .contact-link{color:var(--teal);font-size:.75rem;font-family:'DM Mono',monospace;letter-spacing:1px}
+.flip-hint{font-size:.6rem;letter-spacing:2px;color:rgba(245,240,232,.2);text-transform:uppercase;font-family:'DM Mono',monospace;margin-top:auto;padding-top:1rem}
+
+/* ========== CONTACT ========== */
+#contact{padding:8rem 3rem;background:var(--ink)}
+.contact-wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.2fr;gap:5rem;align-items:start}
+.contact-info{}
+.contact-info h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,4vw,3.5rem);line-height:1.1;margin-bottom:1.5rem}
+.contact-info p{font-size:.9rem;color:rgba(245,240,232,.55);line-height:1.8;margin-bottom:2.5rem}
+.contact-methods{display:flex;flex-direction:column;gap:1.2rem;margin-bottom:2.5rem}
+.contact-method{display:flex;align-items:center;gap:1.2rem;padding:1.2rem 1.5rem;border:1px solid var(--border);background:var(--glass);transition:all .3s;text-decoration:none}
+.contact-method:hover{border-color:var(--gold);background:rgba(200,168,75,.05);transform:translateX(6px)}
+.contact-method-icon{width:44px;height:44px;background:linear-gradient(135deg,rgba(200,168,75,.2),rgba(0,212,200,.1));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.contact-method-info{}
+.contact-method-info span{display:block;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:2px;color:rgba(245,240,232,.3);text-transform:uppercase;margin-bottom:.2rem}
+.contact-method-info strong{font-size:.9rem;color:var(--paper)}
+.contact-3d{position:relative;height:100px;margin-bottom:2rem}
+.floating-cards{position:relative;height:100px}
+.fc{position:absolute;border:1px solid var(--border);background:var(--glass);padding:.5rem 1rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:1px;color:var(--gold);backdrop-filter:blur(10px)}
+.fc1{animation:fcFloat1 4s ease-in-out infinite;top:0;left:0}
+.fc2{animation:fcFloat2 5s ease-in-out infinite;top:20px;right:0}
+@keyframes fcFloat1{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+@keyframes fcFloat2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(-15px) rotate(-2deg)}}
+
+/* CONTACT FORM */
+.contact-form{background:linear-gradient(135deg,rgba(26,26,46,.8),rgba(10,10,15,.9));border:1px solid var(--border);padding:2.5rem;position:relative;overflow:hidden}
+.contact-form::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--teal),var(--purple))}
+.form-group{margin-bottom:1.5rem}
+.form-group label{display:block;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--paper);padding:.9rem 1.2rem;font-family:'Syne',sans-serif;font-size:.9rem;transition:border-color .3s,box-shadow .3s;outline:none;resize:none;-webkit-appearance:none;appearance:none}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,168,75,.1)}
+.form-group select option{background:var(--mid);color:var(--paper)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-submit{width:100%;background:linear-gradient(135deg,var(--gold),#b8963b);color:var(--ink);padding:1rem;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;border:none;cursor:pointer;position:relative;overflow:hidden;transition:all .3s;clip-path:polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%)}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(200,168,75,.3)}
+.form-note{text-align:center;margin-top:1rem;font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(245,240,232,.3);letter-spacing:1px}
+.success-msg{display:none;text-align:center;padding:1rem;border:1px solid rgba(0,212,200,.3);background:rgba(0,212,200,.05);color:var(--teal);font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:1px;margin-top:1rem}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:3rem;text-align:center;position:relative;z-index:1;background:var(--ink)}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:5px;color:var(--gold);margin-bottom:.5rem}
+.footer-logo span{color:var(--teal)}
+.footer-tagline{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:3px;color:rgba(245,240,232,.3);margin-bottom:2rem;text-transform:uppercase}
+.footer-links{display:flex;justify-content:center;gap:2rem;list-style:none;margin-bottom:2rem}
+.footer-links a{color:rgba(245,240,232,.4);text-decoration:none;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;transition:color .3s}
+.footer-links a:hover{color:var(--gold)}
+.footer-bottom{font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(245,240,232,.2);letter-spacing:1px}
+.footer-bottom a{color:var(--teal);text-decoration:none}
+
+/* SCROLL INDICATOR */
+.scroll-indicator{position:fixed;right:2rem;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:1rem;align-items:center}
+.scroll-dot{width:6px;height:6px;border-radius:50%;background:rgba(245,240,232,.2);cursor:pointer;transition:all .3s;position:relative}
+.scroll-dot.active{background:var(--gold);transform:scale(1.5)}
+.scroll-dot::after{content:attr(data-label);position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace;color:rgba(245,240,232,.3);white-space:nowrap;opacity:0;transition:opacity .3s}
+.scroll-dot:hover::after{opacity:1}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+
+/* MOBILE NAV */
+.mobile-nav{position:fixed;inset:0;background:rgba(10,10,15,.98);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;transform:translateX(100%);transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.mobile-nav.open{transform:none}
+.mobile-nav a{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:5px;color:var(--paper);text-decoration:none;transition:color .3s}
+.mobile-nav a:hover{color:var(--gold)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  .products-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem}
+  .nav-links,.nav-cta{display:none}
+  .hamburger{display:flex}
+  .home-inner{grid-template-columns:1fr;gap:3rem;text-align:center;padding-top:6rem}
+  .hero-3d{display:none}
+  .hero-actions{justify-content:center}
+  .about-grid{grid-template-columns:1fr;gap:3rem}
+  .cube-wrap{width:200px;height:200px}
+  .contact-wrap{grid-template-columns:1fr;gap:3rem}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  .products-grid{grid-template-columns:1fr}
+  .scroll-indicator{display:none}
+  section{padding-left:1.5rem!important;padding-right:1.5rem!important}
+  .form-row{grid-template-columns:1fr}
+  .hero-stats{gap:1.5rem}
+  .page-list{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .team-grid{grid-template-columns:1fr}
+  .team-card{height:320px}
+}
+
+/* TILT EFFECT */
+.tilt-card{transform-style:preserve-3d;transition:transform .15s ease}
+
+/* MARQUEE */
+.marquee-section{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:.8rem 0;background:rgba(200,168,75,.03);position:relative;z-index:1}
+.marquee-track{display:flex;width:max-content;animation:marquee 20s linear infinite}
+.marquee-track:hover{animation-play-state:paused}
+.marquee-item{padding:0 3rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:4px;white-space:nowrap;display:flex;align-items:center;gap:1.5rem;color:rgba(245,240,232,.3)}
+.marquee-item span{color:var(--gold);font-size:.5rem}
+@keyframes marquee{to{transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#home" class="logo">Page<span>Craft</span></a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get Started</button>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#home" onclick="toggleMenu()">Home</a>
+  <a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#products" onclick="toggleMenu()">Products</a>
+  <a href="#team" onclick="toggleMenu()">Team</a>
+  <a href="#contact" onclick="toggleMenu()">Contact</a>
+</div>
+
+<!-- SCROLL DOTS -->
+<div class="scroll-indicator">
+  <div class="scroll-dot active" data-label="Home" onclick="scrollTo('#home')"></div>
+  <div class="scroll-dot" data-label="About" onclick="scrollTo('#about')"></div>
+  <div class="scroll-dot" data-label="Products" onclick="scrollTo('#products')"></div>
+  <div class="scroll-dot" data-label="Team" onclick="scrollTo('#team')"></div>
+  <div class="scroll-dot" data-label="Contact" onclick="scrollTo('#contact')"></div>
+</div>
+
+<!-- ========== HOME ========== -->
+<section id="home">
+  <div class="home-inner">
+    <div class="home-text">
+      <div class="badge">✦ Premium Web Experiences</div>
+      <h1 class="hero-title">
+        <div class="line"><span>Landing</span></div>
+        <div class="line"><span><em class="gold-text">Pages</em> That</span></div>
+        <div class="line"><span>Convert<em class="red-text">.</em></span></div>
+      </h1>
+      <p class="hero-sub">World-class landing pages crafted with precision — fully responsive, 3D-powered, and built to turn visitors into customers. Delivered in hours, not weeks.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Start Your Page →</a>
+        <a href="#products" class="btn-ghost">See What's Included</a>
+      </div>
+      <div class="price-pill">
+        <div class="amount">₹1999</div>
+        <div class="details">Complete landing page<strong>⚡ Delivered in 2 hrs</strong></div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num">200+</div><div class="stat-label">Pages Built</div></div>
+        <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Client Satisfaction</div></div>
+        <div class="stat"><div class="stat-num">2hr</div><div class="stat-label">Avg Delivery</div></div>
+      </div>
+    </div>
+    <div class="hero-3d" id="heroCard">
+      <div class="card-3d" id="card3d">
+        <div class="card-3d-face card-front">
+          <div class="card-front-content">
+            <div class="card-tag">// PageCraft.studio</div>
+            <div class="card-number">01</div>
+            <div class="card-preview">
+              <div class="card-bar"></div>
+              <div class="card-bar"></div>
+              <div class="card-bar"></div>
+              <div class="card-dots">
+                <div class="card-dot"></div>
+                <div class="card-dot"></div>
+                <div class="card-dot"></div>
+              </div>
+            </div>
+            <div class="card-meta">
+              <h3>Your Dream Page</h3>
+              <p>Powered by modern web technologies</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-glow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item">Premium Design <span>✦</span></div>
+    <div class="marquee-item">3D Elements <span>✦</span></div>
+    <div class="marquee-item">Under ₹1999 <span>✦</span></div>
+    <div class="marquee-item">2 Hr Delivery <span>✦</span></div>
+    <div class="marquee-item">Fully Responsive <span>✦</span></div>
+    <div class="marquee-item">SEO Ready <span>✦</span></div>
+    <div class="marquee-item">Animations Included <span>✦</span></div>
+    <div class="marquee-item">Premium Design <span>✦</span></div>
+    <div class="marquee-item">3D Elements <span>✦</span></div>
+    <div class="marquee-item">Under ₹1999 <span>✦</span></div>
+    <div class="marquee-item">2 Hr Delivery <span>✦</span></div>
+    <div class="marquee-item">Fully Responsive <span>✦</span></div>
+    <div class="marquee-item">SEO Ready <span>✦</span></div>
+    <div class="marquee-item">Animations Included <span>✦</span></div>
+  </div>
+</div>
+
+<!-- ========== ABOUT ========== -->
+<section id="about">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header reveal">
+      <span class="section-tag">// 001 — About PageCraft</span>
+      <h2 class="section-title">What You <span style="color:var(--gold)">Get</span> For<br>Under ₹1999</h2>
+      <p class="section-sub">Not just a page — a complete digital experience engineered for conversions and wow factor.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-orbs">
+          <div class="orb orb1"></div>
+          <div class="orb orb2"></div>
+        </div>
+        <div class="cube-wrap">
+          <div class="cube">
+            <div class="cube-face front">HOME</div>
+            <div class="cube-face back">ABOUT</div>
+            <div class="cube-face left">TEAM</div>
+            <div class="cube-face right">CONTACT</div>
+            <div class="cube-face top">PRODUCTS</div>
+            <div class="cube-face bottom">CRAFT</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-content reveal">
+        <p class="about-text">Every landing page we build is a hand-crafted masterpiece. We combine cutting-edge CSS animations, 3D transforms, and performance-first code to create pages that don't just look stunning — they perform.</p>
+        <p class="about-text">Your complete landing page includes <strong style="color:var(--paper)">five fully coded sections</strong> — no templates, no drag-and-drop — just clean, production-grade HTML, CSS and JS:</p>
+        <ul class="page-list">
+          <li>Home / Hero Section</li>
+          <li>About Us Page</li>
+          <li>Our Products / Services</li>
+          <li>Team Section</li>
+          <li>Contact Us Page</li>
+          <li>Mobile Responsive</li>
+          <li>3D Visual Elements</li>
+          <li>Smooth Animations</li>
+        </ul>
+        <div class="delivery-badge">
+          <div class="delivery-icon">⚡</div>
+          <div class="delivery-text">
+            <h4>2-Hour Express Delivery</h4>
+            <p>Payment confirmed → page delivered<br>to your inbox within 120 minutes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRODUCTS ========== -->
+<section id="products">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header reveal">
+      <span class="section-tag">// 002 — What We Offer</span>
+      <h2 class="section-title">Our <span style="color:var(--teal)">Products</span></h2>
+      <p class="section-sub">Choose the package that fits your vision. Every tier includes our signature 3D design treatment.</p>
+    </div>
+    <div class="products-grid">
+      <div class="product-card tilt-card reveal">
+        <div class="product-num">01</div>
+        <span class="product-icon">🚀</span>
+        <h3>Starter Landing Page</h3>
+        <p>A single high-impact landing page with hero section, features grid, and call-to-action. Perfect for product launches and campaigns.</p>
+        <div style="margin-bottom:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold)">₹1999</div>
+        <div class="tag">Single Page</div>
+        <div class="product-card-glow"></div>
+      </div>
+      <div class="product-card featured tilt-card reveal">
+        <div class="product-ribbon">POPULAR</div>
+        <div class="product-num">02</div>
+        <span class="product-icon">💎</span>
+        <h3>Full Studio Package</h3>
+        <p>Complete 5-section site — Home, About, Products, Team, Contact. 3D elements, animations, mobile-first. This page, delivered for you.</p>
+        <div style="margin-bottom:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--teal)">₹4999</div>
+        <div class="tag" style="border-color:rgba(0,212,200,.3);color:var(--teal)">Full Site · 5 Pages</div>
+        <div class="product-card-glow"></div>
+      </div>
+      <div class="product-card tilt-card reveal">
+        <div class="product-num">03</div>
+        <span class="product-icon">⚡</span>
+        <h3>Express Revamp</h3>
+        <p>Send us your existing page and we'll redesign it with modern 3D effects, better conversion layout and mobile responsiveness.</p>
+        <div style="margin-bottom:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold)">₹2499</div>
+        <div class="tag">Redesign Service</div>
+        <div class="product-card-glow"></div>
+      </div>
+      <div class="product-card tilt-card reveal">
+        <div class="product-num">04</div>
+        <span class="product-icon">🎯</span>
+        <h3>E-Commerce Ready</h3>
+        <p>Product showcase with interactive 3D cards, pricing tables, testimonials, and integrated payment button sections.</p>
+        <div style="margin-bottom:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold)">₹1999</div>
+        <div class="tag">Shop Ready</div>
+        <div class="product-card-glow"></div>
+      </div>
+      <div class="product-card tilt-card reveal">
+        <div class="product-num">05</div>
+        <span class="product-icon">🌐</span>
+        <h3>Portfolio + Resume</h3>
+        <p>Personal brand site with animated project showcase, skills visualization, timeline, and client testimonials section.</p>
+        <div style="margin-bottom:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold)">₹1299</div>
+        <div class="tag">Personal Brand</div>
+        <div class="product-card-glow"></div>
+      </div>
+      <div class="product-card tilt-card reveal">
+        <div class="product-num">06</div>
+        <span class="product-icon">🔧</span>
+        <h3>Custom Enterprise</h3>
+        <p>Multi-section, multi-page, advanced 3D WebGL backgrounds, complex animations, and technical integrations for serious brands.</p>
+        <div style="margin-bottom:1rem;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold)">Custom</div>
+        <div class="tag">Talk To Us</div>
+        <div class="product-card-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TEAM ========== -->
+<section id="team">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header reveal">
+      <span class="section-tag">// 003 — The Crew</span>
+      <h2 class="section-title">Meet The <span style="color:var(--purple)">Team</span></h2>
+      <p class="section-sub">A small, elite crew of designers and developers obsessed with pixels and performance. Hover cards to learn more.</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">PR</div>
+            <h3>Prateek Rai</h3>
+            <div class="role">Creative Director</div>
+            <p>10+ years crafting digital experiences for startups and Fortune 500s. Obsessed with motion and 3D design.</p>
+            <div class="team-skills">
+              <span class="skill-tag">Three.js</span>
+              <span class="skill-tag">Figma</span>
+              <span class="skill-tag">GSAP</span>
+            </div>
+            <div class="flip-hint">↻ Hover to flip</div>
+          </div>
+          <div class="team-back">
+            <div style="font-size:2rem">🎨</div>
+            <p>Prateek   leads creative direction for every project, ensuring each page has a unique personality and purpose-driven design system.</p>
+            
+          </div>
+        </div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar" style="background:linear-gradient(135deg,var(--teal),var(--purple))">HB</div>
+            <h3>Hrutuja Bayaskar </h3>
+            <div class="role">Lead Developer</div>
+            <p>Full-stack wizard specializing in pixel-perfect CSS, WebGL, and performance optimization across all devices.</p>
+            <div class="team-skills">
+              <span class="skill-tag">WebGL</span>
+              <span class="skill-tag">CSS3D</span>
+              <span class="skill-tag">React</span>
+            </div>
+            <div class="flip-hint">↻ Hover to flip</div>
+          </div>
+          <div class="team-back">
+            <div style="font-size:2rem">⚡</div>
+            <p>Hrutuja turns complex design mockups into blazing-fast, browser-perfect code. She benchmarks every page for Core Web Vitals.</p>
+            
+          </div>
+        </div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar" style="background:linear-gradient(135deg,var(--red),var(--gold))">SB</div>
+            <h3>Sarang</h3>
+            <div class="role">3D Specialist</div>
+            <p>Expert in Three.js, Blender, and real-time 3D for the web. Makes impossible-looking visuals a standard deliverable.</p>
+            <div class="team-skills">
+              <span class="skill-tag">Blender</span>
+              <span class="skill-tag">Three.js</span>
+              <span class="skill-tag">GLSL</span>
+            </div>
+            <div class="flip-hint">↻ Hover to flip</div>
+          </div>
+          <div class="team-back">
+            <div style="font-size:2rem">🌐</div>
+            <p>Sarang background in motion graphics and game development means every 3D element on your page feels alive and intentional.</p>
+
+          </div>
+        </div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar" style="background:linear-gradient(135deg,var(--purple),var(--teal))">NV</div>
+            <h3>Lakshmi </h3>
+            <div class="role">UX Strategist</div>
+            <p>Conversion-focused designer who maps user journeys and turns beautiful designs into measurable business results.</p>
+            <div class="team-skills">
+              <span class="skill-tag">UX</span>
+              <span class="skill-tag">CRO</span>
+              <span class="skill-tag">Analytics</span>
+            </div>
+            <div class="flip-hint">↻ Hover to flip</div>
+          </div>
+          <div class="team-back">
+            <div style="font-size:2rem">📊</div>
+            <p>Lakshmi ensures every design decision serves a strategic purpose. She's responsible for our 98% client satisfaction rate.</p>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section id="contact">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-header reveal">
+      <span class="section-tag">// 004 — Get In Touch</span>
+      <h2 class="section-title">Let's Build<br><span style="color:var(--gold)">Something</span><br>Extraordinary</h2>
+    </div>
+    <div class="contact-wrap">
+      <div class="contact-info reveal">
+        <h2 class="section-title" style="font-size:2rem;margin-bottom:1rem;text-align:left">We respond<br><span style="color:var(--teal)">within minutes.</span></h2>
+        <p>Drop us a message, email, or call directly. Once we confirm your requirements and you make payment, your page will be in your inbox within 2 hours — guaranteed.</p>
+        <div class="contact-methods">
+          <a href="mailto:hello@pagecraft.studio" class="contact-method">
+            <div class="contact-method-icon">✉</div>
+            <div class="contact-method-info">
+              <span>Email Us</span>
+              <strong>workwithhrutu0.0@gmail.com</strong>
+            </div>
+          </a>
+          <a href="tel:+919876543210" class="contact-method">
+            <div class="contact-method-icon">📞</div>
+            <div class="contact-method-info">
+              <span>Call / WhatsApp</span>
+              <strong>+91 8171757379</strong>
+            </div>
+          </a>
+          <a href="https://wa.me/918171757379" class="contact-method" target="_blank">
+            <div class="contact-method-icon">💬</div>
+            <div class="contact-method-info">
+              <span>WhatsApp Us</span>
+              <strong>Message on WhatsApp</strong>
+            </div>
+          </a>
+        </div>
+        <div class="floating-cards">
+          <div class="fc fc1">⚡ 2-hr delivery guaranteed</div>
+          <div class="fc fc2">✓ 100% custom code</div>
+        </div>
+      </div>
+      <div class="contact-form reveal" id="contactForm">
+        <div style="font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:1.8rem;border-bottom:1px solid var(--border);padding-bottom:1rem">// Start Your Project</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="fname" placeholder="Rahul Sharma" required/>
+          </div>
+          <div class="form-group">
+            <label>Phone / WhatsApp</label>
+            <input type="tel" id="fphone" placeholder="+91 98765 43210"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="femail" placeholder="you@company.com" required/>
+        </div>
+        <div class="form-group">
+          <label>Package</label>
+          <select id="fpackage">
+            <option value="">Select a package…</option>
+            <option>Full Studio Package — ₹4999</option>
+            <option>Starter Landing Page — ₹1999</option>
+            <option>Express Revamp — ₹2499</option>
+            <option>E-Commerce Ready — ₹3999</option>
+            <option>Portfolio + Resume — ₹3299</option>
+            <option>Custom Enterprise — Let's Talk</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tell Us About Your Project</label>
+          <textarea id="fmessage" rows="4" placeholder="Describe your business, target audience, and any specific requirements…"></textarea>
+        </div>
+        <button class="form-submit" onclick="submitForm()">Send Enquiry — Get My Page ⚡</button>
+        <div class="form-note">⚡ Average response time: under 15 minutes · Mon–Sat 9am–9pm IST</div>
+        <div class="success-msg" id="successMsg">✓ Message received! We'll WhatsApp you within 15 minutes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Page<span>Craft</span></div>
+  <div class="footer-tagline">// Premium Landing Pages · Under ₹1999 · 2-Hour Delivery</div>
+  <ul class="footer-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="footer-bottom">
+    © 2025 PageCraft Studio — <a href="mailto:workwithhrutu0.0@gmail.com">workwithhrutu0.0@gmail.com</a> — <a href="tel:+918171757379">+91 8171757379</a>
+  </div>
+</footer>
+
+<script>
+// ===== CURSOR =====
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}animRing();
+document.querySelectorAll('a,button,.product-card,.team-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='20px';cursor.style.height='20px';ring.style.width='60px';ring.style.height='60px'});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='12px';cursor.style.height='12px';ring.style.width='40px';ring.style.height='40px'});
+});
+
+// ===== THREE.JS BACKGROUND =====
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,.1,1000);
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('bg-canvas'),alpha:true,antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+camera.position.z=30;
+
+// Particles
+const pGeo=new THREE.BufferGeometry();
+const pCount=1500;
+const pPos=new Float32Array(pCount*3);
+const pSizes=new Float32Array(pCount);
+for(let i=0;i<pCount*3;i++){pPos[i]=(Math.random()-.5)*120;}
+for(let i=0;i<pCount;i++){pSizes[i]=Math.random()*2+.5;}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+pGeo.setAttribute('size',new THREE.BufferAttribute(pSizes,1));
+const pMat=new THREE.PointsMaterial({color:0xc8a84b,size:.3,transparent:true,opacity:.5,sizeAttenuation:true});
+const particles=new THREE.Points(pGeo,pMat);
+scene.add(particles);
+
+// Grid of floating cubes
+const cubeGeo=new THREE.BoxGeometry(1,1,1);
+const cubes=[];
+for(let i=0;i<12;i++){
+  const mat=new THREE.MeshBasicMaterial({color:i%3===0?0xc8a84b:i%3===1?0x00d4c8:0x7b2fff,wireframe:true,transparent:true,opacity:.15});
+  const cube=new THREE.Mesh(cubeGeo,mat);
+  cube.position.set((Math.random()-.5)*60,(Math.random()-.5)*40,(Math.random()-.5)*20);
+  cube.userData={rx:Math.random()*.01-.005,ry:Math.random()*.01-.005,vy:(Math.random()-.5)*.02};
+  scene.add(cube);cubes.push(cube);
+}
+
+// Torus
+const tGeo=new THREE.TorusGeometry(8,2,16,100);
+const tMat=new THREE.MeshBasicMaterial({color:0xc8a84b,wireframe:true,transparent:true,opacity:.06});
+const torus=new THREE.Mesh(tGeo,tMat);
+torus.position.set(15,-5,-10);
+scene.add(torus);
+
+// Icosahedron
+const iGeo=new THREE.IcosahedronGeometry(5,1);
+const iMat=new THREE.MeshBasicMaterial({color:0x00d4c8,wireframe:true,transparent:true,opacity:.06});
+const ico=new THREE.Mesh(iGeo,iMat);
+ico.position.set(-20,8,-15);
+scene.add(ico);
+
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',e=>{mouseX=(e.clientX/window.innerWidth-.5)*4;mouseY=(e.clientY/window.innerHeight-.5)*3;});
+
+function animBg(){
+  requestAnimationFrame(animBg);
+  const t=Date.now()*.001;
+  particles.rotation.y=t*.04;particles.rotation.x=t*.02;
+  cubes.forEach(c=>{c.rotation.x+=c.userData.rx;c.rotation.y+=c.userData.ry;c.position.y+=c.userData.vy;if(c.position.y>25||c.position.y<-25)c.userData.vy*=-1;});
+  torus.rotation.x=t*.3;torus.rotation.y=t*.2;
+  ico.rotation.x=t*.15;ico.rotation.y=t*.25;
+  camera.position.x+=(mouseX-camera.position.x)*.03;
+  camera.position.y+=(-mouseY-camera.position.y)*.03;
+  renderer.render(scene,camera);
+}animBg();
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+
+// ===== HERO CARD 3D TILT =====
+const heroCard=document.getElementById('heroCard');
+const card3d=document.getElementById('card3d');
+heroCard&&heroCard.addEventListener('mousemove',e=>{
+  const r=heroCard.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width-.5;
+  const y=(e.clientY-r.top)/r.height-.5;
+  card3d.style.animation='none';
+  card3d.style.transform=`rotateX(${-y*25}deg) rotateY(${x*25}deg)`;
+});
+heroCard&&heroCard.addEventListener('mouseleave',()=>{card3d.style.animation='float3d 6s ease-in-out infinite';card3d.style.transform='';});
+
+// ===== TILT CARDS =====
+document.querySelectorAll('.tilt-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`perspective(800px) rotateX(${-y*12}deg) rotateY(${x*12}deg) translateY(-8px)`;
+  });
+  card.addEventListener('mouseleave',()=>{card.style.transform='';});
+});
+
+// ===== NAV SCROLL =====
+window.addEventListener('scroll',()=>{
+  const nav=document.getElementById('navbar');
+  nav.classList.toggle('scrolled',window.scrollY>50);
+  updateScrollDots();
+});
+
+// ===== SCROLL DOTS =====
+const sections=['home','about','products','team','contact'];
+const dots=document.querySelectorAll('.scroll-dot');
+function updateScrollDots(){
+  const scroll=window.scrollY+window.innerHeight/2;
+  sections.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const top=el.offsetTop;const bot=top+el.offsetHeight;
+    dots[i].classList.toggle('active',scroll>=top&&scroll<bot);
+  });
+}
+function scrollTo(sel){document.querySelector(sel).scrollIntoView({behavior:'smooth'});}
+
+// ===== REVEAL =====
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ===== MOBILE MENU =====
+function toggleMenu(){
+  const m=document.getElementById('mobileNav');
+  const h=document.getElementById('hamburger');
+  m.classList.toggle('open');
+  const spans=h.querySelectorAll('span');
+  if(m.classList.contains('open')){
+    spans[0].style.transform='rotate(45deg) translate(5px,5px)';
+    spans[1].style.opacity='0';
+    spans[2].style.transform='rotate(-45deg) translate(5px,-5px)';
+  } else {
+    spans.forEach(s=>{s.style.transform='';s.style.opacity='';});
+  }
+}
+
+// ===== FORM =====
+function submitForm(){
+  const name=document.getElementById('fname').value;
+  const email=document.getElementById('femail').value;
+  if(!name||!email){alert('Please fill in your name and email.');return;}
+  document.getElementById('successMsg').style.display='block';
+  document.querySelector('.form-submit').textContent='✓ Message Sent!';
+  document.querySelector('.form-submit').style.background='var(--teal)';
+}
+</script>
+</body>
+</html>
